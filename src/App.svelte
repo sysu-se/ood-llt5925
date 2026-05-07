@@ -1,54 +1,40 @@
 <script>
-	import { onMount } from 'svelte';
-	import { validateSencode } from '@sudoku/sencode';
-	import game from '@sudoku/game';
-	import { modal } from '@sudoku/stores/modal';
-	import { gameWon } from '@sudoku/stores/game';
-	import Board from './components/Board/index.svelte';
-	import Controls from './components/Controls/index.svelte';
-	import Header from './components/Header/index.svelte';
-	import Modal from './components/Modal/index.svelte';
+  import { onMount } from 'svelte';
+  import { gameStore } from './stores/gameStore.js';
+  import { modal } from '@sudoku/stores/modal';
+  import Board from './components/Board/index.svelte';
+  import Controls from './components/Controls/index.svelte';
+  import Header from './components/Header/index.svelte';
+  import Modal from './components/Modal/index.svelte';
 
-	gameWon.subscribe(won => {
-		if (won) {
-			game.pause();
-			modal.show('gameover');
-		}
-	});
+  const gameWon = gameStore.gameWon;
 
-	onMount(() => {
-		let hash = location.hash;
+  gameWon.subscribe(won => {
+    if (won) {
+      gameStore.pauseGame();
+      modal.show('gameover');
+    }
+  });
 
-		if (hash.startsWith('#')) {
-			hash = hash.slice(1);
-		}
-
-		let sencode;
-		if (validateSencode(hash)) {
-			sencode = hash;
-		}
-
-		modal.show('welcome', { onHide: game.resume, sencode });
-	});
+  onMount(() => {
+    modal.show('welcome', { onHide: () => gameStore.resumeGame() });
+  });
 </script>
 
-<!-- Timer, Menu, etc. -->
 <header>
-	<Header />
+  <Header />
 </header>
 
-<!-- Sudoku Field -->
 <section>
-	<Board />
+  <Board />
 </section>
 
-<!-- Keyboard -->
 <footer>
-	<Controls />
+  <Controls />
 </footer>
 
 <Modal />
 
 <style global>
-	@import "./styles/global.css";
+  @import "./styles/global.css";
 </style>
